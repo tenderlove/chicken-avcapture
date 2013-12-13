@@ -1,7 +1,7 @@
 ;;;; av_capture.scm
 ;;;; Bindings to AVCapture
 
-(module av-capture
+(module avcapture
   (aaron)
 
 (import scheme chicken)

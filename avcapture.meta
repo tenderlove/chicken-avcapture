@@ -1,6 +1,6 @@
 ;;; av_capture.meta -*- Hen -*-
 
-((egg "av_capture.egg")
+((egg "avcapture.egg")
  (synopsis "Bindings to AVCapture")
  (author "Aaron Patterson")
  (license "MIT")
@@ -8,5 +8,5 @@
  (doc-from-wiki)
  (test-depends test)
  (depends sql-null)
- (files "av_capture.scm" "av_capture.meta" "av_capture.setup" "tests/run.scm"))
+ (files "avcapture.scm" "avcapture.meta" "avcapture.setup" "tests/run.scm"))
 

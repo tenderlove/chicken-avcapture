@@ -1,8 +1,8 @@
-(use av-capture test srfi-1)
+(use avcapture test srfi-1)
 
-(test-begin "av-capture")
+(test-begin "avcapture")
 
-(test "aaron" "aaron" (aaron))
+(test "aaron" "hello" (aaron))
 
 (test-end)
 (test-exit)

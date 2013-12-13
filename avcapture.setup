@@ -4,12 +4,12 @@
 (let ((cflags "")
       (lflags "-framework Foundation -framework AVFoundation -framework ImageCaptureCore"))
 
-(compile -O2 -d0 -s -j av_capture "av_capture.scm" ,cflags ,lflags)
-(compile -O2 -d0 -s av_capture.import.scm))
+(compile -O2 -d0 -s -j avcapture "avcapture.scm" ,cflags ,lflags)
+(compile -O2 -d0 -s avcapture.import.scm))
 
 (install-extension
   'av_capture
-  '("av_capture.so" "av_capture.import.so")
+  '("avcapture.so" "avcapture.import.so")
   '((version "1.0.0")))
 
 ;; vim: set ft=scheme:
