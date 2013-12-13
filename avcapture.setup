@@ -1,7 +1,7 @@
 (use srfi-1)
 (use srfi-13)
 (use posix)
-(let ((cflags "")
+(let ((cflags "-objc")
       (lflags "-framework Foundation -framework AVFoundation -framework ImageCaptureCore"))
 
 (compile -O2 -d0 -s -j avcapture "avcapture.scm" ,cflags ,lflags)

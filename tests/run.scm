@@ -1,8 +1,12 @@
-(use avcapture test srfi-1)
+(use avcapture test)
 
 (test-begin "avcapture")
 
-(test "aaron" "hello" (aaron))
+(test-group "devices"
+  (let ((devs (devices)))
+    (test-assert (< 0 (length devs)))
+    (test-assert (map device-name devs)))
+)
 
 (test-end)
 (test-exit)

@@ -7,6 +7,5 @@
  (category net)
  (doc-from-wiki)
  (test-depends test)
- (depends sql-null)
  (files "avcapture.scm" "avcapture.meta" "avcapture.setup" "tests/run.scm"))
 
