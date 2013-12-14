@@ -80,8 +80,8 @@
 (define (video-connection output) (connect-output avmedia-type-video output))
 
 (define (connect-output media-type output)
-  (wrap-video-connection
-    (_connect-output media-type (unwrap-stillimage-output output))))
+  (let ((conn (_connect-output media-type (unwrap-stillimage-output output))))
+    (if conn (wrap-video-connection conn) #f)))
 
 ;; Native bits
 

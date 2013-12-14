@@ -15,6 +15,7 @@
     (test-assert (make-device-input (find device-has-video? devs)))))
 
 (test-group "device-output"
+  (test-assert (eq? #f (video-connection (make-stillimage-output))))
   (test-assert (make-stillimage-output)))
 
 (test-group "session"
