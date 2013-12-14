@@ -12,7 +12,10 @@
 
 (test-group "device-input"
   (let ((devs (devices)))
-    (test-assert (make-device-input (find device-has-video? devs))))
+    (test-assert (make-device-input (find device-has-video? devs)))))
+
+(test-group "device-output"
+  (test-assert (make-stillimage-output))
 )
 
 (test-end)

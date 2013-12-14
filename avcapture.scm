@@ -7,6 +7,7 @@
    device-has-media-type?
    device-has-video?
    make-device-input
+   make-stillimage-output
    avmedia-type-video)
 
 (import scheme chicken foreign)
@@ -20,6 +21,11 @@
   (wrap-device-input input)
   device-input?
   (input unwrap-device-input))
+
+(define-record-type avcapture-stillimage-output
+  (wrap-stillimage-output output)
+  stillimage-output?
+  (output unwrap-stillimage-output))
 
 (define (device-has-video? dev) (device-has-media-type? dev avmedia-type-video))
 (define (device-has-media-type? device media-type)
@@ -41,13 +47,29 @@
 (define (make-device-input device)
   (wrap-device-input (_make-device-input (unwrap-device device))))
 
+(define (make-stillimage-output)
+  (wrap-stillimage-output (_make-stillimage-output)))
+
 ;; Native bits
 
 (foreign-declare "#import <AVFoundation/AVFoundation.h>")
 
+(define-foreign-type AVCaptureStillImageOutput (c-pointer "AVCaptureStillImageOutput"))
 (define-foreign-type AVCaptureDevice (c-pointer "AVCaptureDevice"))
 (define-foreign-type AVCaptureDeviceInput (c-pointer "AVCaptureDeviceInput"))
 (define-foreign-type NSArray (c-pointer "NSArray"))
+
+(define _make-stillimage-output (foreign-safe-lambda* AVCaptureStillImageOutput
+                                                      ()
+"
+  AVCaptureStillImageOutput *output = [[AVCaptureStillImageOutput alloc] init];
+  NSDictionary *outputSettings = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                    AVVideoCodecJPEG, AVVideoCodecKey,
+                                    nil];
+  [output setOutputSettings:outputSettings];
+  [outputSettings release];
+  C_return(output);
+"))
 
 (define _make-device-input (foreign-safe-lambda* AVCaptureDeviceInput
                                                  ((AVCaptureDevice dev))
