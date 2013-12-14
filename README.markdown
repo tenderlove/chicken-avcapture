@@ -1,4 +1,4 @@
-# AVCapture wraper for Chicken Scheme
+# AVCapture wrapper for Chicken Scheme
 
 This wraps AVCapture and exposes it to Chicken.
 
