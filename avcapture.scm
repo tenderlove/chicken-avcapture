@@ -3,7 +3,8 @@
 
 (module avcapture
   (devices
-   device-name)
+   device-name
+   avmedia-type-video)
 
 (import scheme chicken foreign)
 
@@ -22,6 +23,8 @@
       (if (= idx devlen)
           seed
           (loop (+ idx 1) (cons (wrap-device (obj-at-idx devs idx)) seed))))))
+
+(define avmedia-type-video (get-avmedia-type-video))
 
 ;; Native bits
 
@@ -45,4 +48,6 @@
                                           (int idx))
                                        "C_return([ary objectAtIndex: idx]);"))
 
+(define get-avmedia-type-video (foreign-safe-lambda* c-string ()
+                                "C_return([AVMediaTypeVideo UTF8String]);"))
 )
