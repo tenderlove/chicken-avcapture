@@ -10,5 +10,10 @@
     (test-assert (< 0 (length (filter device-has-video? devs)))))
 )
 
+(test-group "device-input"
+  (let ((devs (devices)))
+    (test-assert (make-device-input (find device-has-video? devs))))
+)
+
 (test-end)
 (test-exit)

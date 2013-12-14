@@ -6,6 +6,7 @@
    device-name
    device-has-media-type?
    device-has-video?
+   make-device-input
    avmedia-type-video)
 
 (import scheme chicken foreign)
@@ -14,6 +15,11 @@
   (wrap-device device)
   device?
   (device unwrap-device))
+
+(define-record-type avcapture-device-input
+  (wrap-device-input input)
+  device-input?
+  (input unwrap-device-input))
 
 (define (device-has-video? dev) (device-has-media-type? dev avmedia-type-video))
 (define (device-has-media-type? device media-type)
@@ -32,12 +38,24 @@
 
 (define avmedia-type-video (get-avmedia-type-video))
 
+(define (make-device-input device)
+  (wrap-device-input (_make-device-input (unwrap-device device))))
+
 ;; Native bits
 
 (foreign-declare "#import <AVFoundation/AVFoundation.h>")
 
 (define-foreign-type AVCaptureDevice (c-pointer "AVCaptureDevice"))
+(define-foreign-type AVCaptureDeviceInput (c-pointer "AVCaptureDeviceInput"))
 (define-foreign-type NSArray (c-pointer "NSArray"))
+
+(define _make-device-input (foreign-safe-lambda* AVCaptureDeviceInput
+                                                 ((AVCaptureDevice dev))
+"
+AVCaptureDeviceInput *input = [AVCaptureDeviceInput alloc];
+[input initWithDevice:dev error: nil];
+C_return(input);
+"))
 
 (define _device-has-media-type? (foreign-safe-lambda* scheme-object
                                                       ((AVCaptureDevice dev)
