@@ -25,7 +25,16 @@
         (output (make-stillimage-output)))
     (session-add-input! (make-device-input dev) session)
     (session-add-output! output session)
-    (test-assert (video-connection? (video-connection output)))))
+    (test-assert (video-connection? (video-connection output))))
+
+  (test-group "running"
+    (let ((session (make-session))
+          (dev (find device-has-video? (devices)))
+          (output (make-stillimage-output)))
+      (session-add-input! (make-device-input dev) session)
+      (session-add-output! output session)
+      (test-assert (session-start-running! session))
+      (test-assert (session-stop-running! session)))))
 
 (test-end)
 (test-exit)

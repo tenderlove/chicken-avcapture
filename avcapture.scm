@@ -11,6 +11,8 @@
    make-session
    session-add-input!
    session-add-output!
+   session-start-running!
+   session-stop-running!
    video-connection?
    video-connection
    avmedia-type-video)
@@ -77,6 +79,14 @@
                        (unwrap-session session))
   session)
 
+(define (session-start-running! session)
+  (_session-start-running! (unwrap-session session))
+  session)
+
+(define (session-stop-running! session)
+  (_session-stop-running! (unwrap-session session))
+  session)
+
 (define (video-connection output) (connect-output avmedia-type-video output))
 
 (define (connect-output media-type output)
@@ -127,6 +137,20 @@ C_return(session);
                                               (AVCaptureSession session))
 "
 [session addOutput:output];
+C_return(session);
+"))
+
+(define _session-start-running! (foreign-lambda* AVCaptureSession
+                                             ((AVCaptureSession session))
+"
+[session startRunning];
+C_return(session);
+"))
+
+(define _session-stop-running! (foreign-lambda* AVCaptureSession
+                                             ((AVCaptureSession session))
+"
+[session stopRunning];
 C_return(session);
 "))
 
