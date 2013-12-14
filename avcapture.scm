@@ -9,6 +9,10 @@
    make-device-input
    make-stillimage-output
    make-session
+   session-add-input!
+   session-add-output!
+   video-connection?
+   video-connection
    avmedia-type-video)
 
 (import scheme chicken foreign)
@@ -17,6 +21,11 @@
   (wrap-session session)
   session?
   (session unwrap-session))
+
+(define-record-type avcapture-videoconn
+  (wrap-video-connection conn)
+  video-connection?
+  (conn unwrap-video-connection))
 
 (define-record-type avcapture-device
   (wrap-device device)
@@ -58,6 +67,22 @@
 
 (define (make-session) (wrap-session (_make-session)))
 
+(define (session-add-input! input session)
+  (_session-add-input! (unwrap-device-input input)
+                       (unwrap-session session))
+  session)
+
+(define (session-add-output! output session)
+  (_session-add-output! (unwrap-stillimage-output output)
+                       (unwrap-session session))
+  session)
+
+(define (video-connection output) (connect-output avmedia-type-video output))
+
+(define (connect-output media-type output)
+  (wrap-video-connection
+    (_connect-output media-type (unwrap-stillimage-output output))))
+
 ;; Native bits
 
 (foreign-declare "#import <AVFoundation/AVFoundation.h>")
@@ -66,11 +91,43 @@
 (define-foreign-type AVCaptureDevice (c-pointer "AVCaptureDevice"))
 (define-foreign-type AVCaptureDeviceInput (c-pointer "AVCaptureDeviceInput"))
 (define-foreign-type AVCaptureSession (c-pointer "AVCaptureSession"))
+(define-foreign-type AVCaptureConnection (c-pointer "AVCaptureConnection"))
 (define-foreign-type NSArray (c-pointer "NSArray"))
 
+(define _connect-output (foreign-lambda* AVCaptureConnection
+                                         ((c-string media_type)
+                                          (AVCaptureConnection capture))
+"
+  NSString * mt = [NSString stringWithCString: media_type
+                            encoding: NSUTF8StringEncoding];
+
+  AVCaptureConnection * conn = [capture connectionWithMediaType:mt];
+
+  if (conn) {
+    C_return(conn);
+  } else {
+    return C_SCHEME_FALSE;
+  }
+"))
 (define _make-session (foreign-safe-lambda* AVCaptureSession ()
 "
   C_return([[AVCaptureSession alloc] init]);
+"))
+
+(define _session-add-input! (foreign-lambda* AVCaptureSession
+                                             ((AVCaptureDeviceInput input)
+                                              (AVCaptureSession session))
+"
+[session addInput:input];
+C_return(session);
+"))
+
+(define _session-add-output! (foreign-lambda* AVCaptureSession
+                                             ((AVCaptureStillImageOutput output)
+                                              (AVCaptureSession session))
+"
+[session addOutput:output];
+C_return(session);
 "))
 
 (define _make-stillimage-output (foreign-safe-lambda* AVCaptureStillImageOutput
