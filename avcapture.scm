@@ -106,7 +106,7 @@
   if (conn) {
     C_return(conn);
   } else {
-    return C_SCHEME_FALSE;
+    C_return(NULL);
   }
 "))
 (define _make-session (foreign-safe-lambda* AVCaptureSession ()
