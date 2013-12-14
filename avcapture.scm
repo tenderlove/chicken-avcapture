@@ -14,7 +14,14 @@
 
 (define (device-name device) (get-device-name (unwrap-device device)))
 
-(define (devices) (map wrap-device (get_devices '())))
+(define (devices)
+  (let* ((devs (get-devs))
+         (devlen (dev-len devs)))
+    (let loop ((idx 0)
+               (seed '()))
+      (if (= idx devlen)
+          seed
+          (loop (+ idx 1) (cons (wrap-device (obj-at-idx devs idx)) seed))))))
 
 ;; Native bits
 
@@ -27,17 +34,15 @@
   ((AVCaptureDevice dev))
   "C_return([[dev localizedName] UTF8String]);"))
 
-(define get_devices (foreign-safe-lambda* scheme-object
-                                          ((scheme-object seed))
-"
-NSArray * list = [AVCaptureDevice devices];
-for (id object in list) {
-  C_word * _pair = C_alloc(C_SIZEOF_PAIR);
-  C_word * a = C_alloc(C_SIZEOF_POINTER);
-  C_word ptr = C_mpointer(&a, object);
-  seed = C_pair(&_pair, ptr, seed);
-}
-C_return(seed);
-"))
+(define get-devs (foreign-safe-lambda* c-pointer ()
+                                       "C_return([AVCaptureDevice devices]);"))
+
+(define dev-len (foreign-safe-lambda* int ((c-pointer ary))
+                                       "C_return([ary count]);"))
+
+(define obj-at-idx (foreign-safe-lambda* AVCaptureDevice
+                                         ((c-pointer ary)
+                                          (int idx))
+                                       "C_return([ary objectAtIndex: idx]);"))
 
 )
