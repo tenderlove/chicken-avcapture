@@ -8,9 +8,15 @@
    device-has-video?
    make-device-input
    make-stillimage-output
+   make-session
    avmedia-type-video)
 
 (import scheme chicken foreign)
+
+(define-record-type avcapture-session
+  (wrap-session session)
+  session?
+  (session unwrap-session))
 
 (define-record-type avcapture-device
   (wrap-device device)
@@ -50,6 +56,8 @@
 (define (make-stillimage-output)
   (wrap-stillimage-output (_make-stillimage-output)))
 
+(define (make-session) (wrap-session (_make-session)))
+
 ;; Native bits
 
 (foreign-declare "#import <AVFoundation/AVFoundation.h>")
@@ -57,7 +65,13 @@
 (define-foreign-type AVCaptureStillImageOutput (c-pointer "AVCaptureStillImageOutput"))
 (define-foreign-type AVCaptureDevice (c-pointer "AVCaptureDevice"))
 (define-foreign-type AVCaptureDeviceInput (c-pointer "AVCaptureDeviceInput"))
+(define-foreign-type AVCaptureSession (c-pointer "AVCaptureSession"))
 (define-foreign-type NSArray (c-pointer "NSArray"))
+
+(define _make-session (foreign-safe-lambda* AVCaptureSession ()
+"
+  C_return([[AVCaptureSession alloc] init]);
+"))
 
 (define _make-stillimage-output (foreign-safe-lambda* AVCaptureStillImageOutput
                                                       ()
