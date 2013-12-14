@@ -1,4 +1,4 @@
-(use avcapture test)
+(use avcapture test srfi-1)
 
 (test-begin "avcapture")
 
@@ -6,7 +6,8 @@
   (test-assert avmedia-type-video)
   (let ((devs (devices)))
     (test-assert (< 0 (length devs)))
-    (test-assert (map device-name devs)))
+    (test-assert (map device-name devs))
+    (test-assert (< 0 (length (filter device-has-video? devs)))))
 )
 
 (test-end)
