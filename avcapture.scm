@@ -15,9 +15,12 @@
    session-stop-running!
    video-connection?
    video-connection
+   capture-photo-from-device
+   capture-photo
    avmedia-type-video)
 
-(import scheme chicken foreign)
+(import scheme chicken foreign posix)
+(use posix)
 
 (define-record-type avcapture-session
   (wrap-session session)
@@ -93,6 +96,22 @@
   (let ((conn (_connect-output media-type (unwrap-stillimage-output output))))
     (if conn (wrap-video-connection conn) #f)))
 
+(define (capture-photo connection output)
+  (let ((conn (unwrap-video-connection connection))
+        (out (unwrap-stillimage-output output)))
+    (let-values (((in-fd out-fd) (create-pipe)))
+      (_capture-photo conn out out-fd)
+      (open-input-file* in-fd))))
+
+(define (capture-photo-from-device thunk device)
+  (let ((session (make-session))
+        (output (make-stillimage-output)))
+    (session-add-input! (make-device-input device) session)
+    (session-add-output! output session)
+    (session-start-running! session)
+    (let ((conn (video-connection output)))
+      (thunk (lambda () (capture-photo conn output))))))
+
 ;; Native bits
 
 (foreign-declare "#import <AVFoundation/AVFoundation.h>")
@@ -104,6 +123,22 @@
 (define-foreign-type AVCaptureConnection (c-pointer "AVCaptureConnection"))
 (define-foreign-type NSArray (c-pointer "NSArray"))
 
+(define _capture-photo (foreign-lambda* int
+                                        ((AVCaptureConnection connection)
+                                         (AVCaptureStillImageOutput output)
+                                         (int wrt))
+"
+  [output captureStillImageAsynchronouslyFromConnection: connection
+          completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
+            if (imageDataSampleBuffer != NULL) {
+              NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+              write(wrt, [imageData bytes], [imageData length]);
+              close(wrt);
+            } else {
+            }
+          }];
+  C_return(wrt);
+"))
 (define _connect-output (foreign-lambda* AVCaptureConnection
                                          ((c-string media_type)
                                           (AVCaptureConnection capture))

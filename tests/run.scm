@@ -1,5 +1,14 @@
 (use avcapture test srfi-1)
 
+(define (read-photo port)
+  (with-output-to-string (lambda ()
+    (let loop ((x (read-byte port)))
+      (if (not (eof-object? x))
+        (begin
+          (write-byte x)
+          (loop (read-byte port)))
+        (close-input-port port))))))
+
 (test-begin "avcapture")
 
 (test-group "devices"
@@ -34,7 +43,24 @@
       (session-add-input! (make-device-input dev) session)
       (session-add-output! output session)
       (test-assert (session-start-running! session))
-      (test-assert (session-stop-running! session)))))
+      (test-assert (session-stop-running! session))))
+
+  (test-group "take a photo"
+    (let ((session (make-session))
+          (dev (find device-has-video? (devices)))
+          (output (make-stillimage-output)))
+      (session-add-input! (make-device-input dev) session)
+      (session-add-output! output session)
+      (test-assert (session-start-running! session))
+      (test-assert (capture-photo (video-connection output) output))
+      (test-assert (session-stop-running! session))))
+
+  (test-group "high level"
+    (let ((photo-bytes (capture-photo-from-device (lambda (capture-photo)
+                                                    (read-photo (capture-photo)))
+                                                  (find device-has-video? (devices)))))
+
+      (test-assert photo-bytes))))
 
 (test-end)
 (test-exit)
